@@ -91,6 +91,48 @@ if __name__ == "__main__":
     memory_limit = "2Gi"
     cpu_request = "1"
     memory_request = "1Gi"
+=============
+import os
+
+def apply_resource_quota(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request):
+    yaml_content = f"""\
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-{namespace_name}
+spec:
+  hard:
+    limits.cpu: {cpu_limit}
+    limits.memory: {memory_limit}
+    requests.cpu: {cpu_request}
+    requests.memory: {memory_request}
+"""
+
+    try:
+        with open("resource_quota.yaml", "w") as file:
+            file.write(yaml_content)
+        
+        command = f"kubectl apply -n {namespace_name} -f resource_quota.yaml"
+        os.system(command)
+        
+        print(f"Resource quota applied for namespace '{namespace_name}' successfully.")
+    except Exception as e:
+        print(f"Error applying resource quota: {e}")
+    finally:
+        os.remove("resource_quota.yaml")
+
+# Usage example
+if __name__ == "__main__":
+    # Set the desired namespace name, CPU limit, memory limit, CPU request, and memory request
+    namespace_name = "my-namespace"
+    cpu_limit = "2"
+    memory_limit = "2Gi"
+    cpu_request = "1"
+    memory_request = "1Gi"
+
+    # Apply the resource quota
+    apply_resource_quota(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request)
+
 
     # Apply the resource quota
     apply_resource_quota(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request)
