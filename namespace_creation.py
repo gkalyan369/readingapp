@@ -59,3 +59,39 @@ if __name__ == "__main__":
 
     # Create the namespace if it doesn't exist and reserve capacity
     create_namespace(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request)
+    ==============
+
+import os
+
+def apply_resource_quota(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request):
+    command = f"kubectl apply -n {namespace_name} -f - <<EOF\n\
+apiVersion: v1\n\
+kind: ResourceQuota\n\
+metadata:\n\
+  name: quota-{namespace_name}\n\
+spec:\n\
+  hard:\n\
+    limits.cpu: {cpu_limit}\n\
+    limits.memory: {memory_limit}\n\
+    requests.cpu: {cpu_request}\n\
+    requests.memory: {memory_request}\n\
+EOF"
+
+    try:
+        os.system(command)
+        print(f"Resource quota applied for namespace '{namespace_name}' successfully.")
+    except Exception as e:
+        print(f"Error applying resource quota: {e}")
+
+# Usage example
+if __name__ == "__main__":
+    # Set the desired namespace name, CPU limit, memory limit, CPU request, and memory request
+    namespace_name = "my-namespace"
+    cpu_limit = "2"
+    memory_limit = "2Gi"
+    cpu_request = "1"
+    memory_request = "1Gi"
+
+    # Apply the resource quota
+    apply_resource_quota(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request)
+
