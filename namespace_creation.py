@@ -1,7 +1,26 @@
 from kubernetes import client, config
 
+def namespace_exists(namespace_name):
+    api_instance = client.CoreV1Api()
+
+    try:
+        api_instance.read_namespace(namespace_name)
+        return True
+
+    except client.ApiException as e:
+        if e.status == 404:
+            return False
+        else:
+            print(f"Error checking namespace: {e}")
+            return False
+
 def create_namespace(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request):
     api_instance = client.CoreV1Api()
+
+    if namespace_exists(namespace_name):
+        print(f"Namespace '{namespace_name}' already exists.")
+        return
+
     namespace = client.V1Namespace(metadata=client.V1ObjectMeta(name=namespace_name))
 
     try:
@@ -38,5 +57,5 @@ if __name__ == "__main__":
     cpu_request = "1"
     memory_request = "1Gi"
 
-    # Create the namespace and reserve capacity
+    # Create the namespace if it doesn't exist and reserve capacity
     create_namespace(namespace_name, cpu_limit, memory_limit, cpu_request, memory_request)
